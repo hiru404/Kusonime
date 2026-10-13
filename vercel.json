@@ -1,0 +1,15 @@
+{
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/kusonime/all-anime", "destination": "/api/all-anime" },
+    { "source": "/kusonime/detail/:slug", "destination": "/api/detail?slug=:slug" }
+  ]
+}
