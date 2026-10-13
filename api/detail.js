@@ -1,14 +1,26 @@
 import * as cheerio from 'cheerio';
 
-const decodeLink = (href) => {
+const decodeLink = (href = '') => {
   try {
-    const b64 = new URL(href).searchParams.get('url');
-    return b64 ? Buffer.from(b64, 'base64').toString('utf8') : href;
+    const clean = href.replace(/&amp;/g, '&');
+    const u = new URL(clean);
+
+    // bukan link shortener: kembalikan apa adanya
+    if (!u.hostname.includes('shrinkearn.com')) return clean;
+
+    let b64 = u.searchParams.get('url');
+    if (!b64) return clean;
+
+    // dukung base64 URL-safe + padding
+    b64 = b64.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+
+    const decoded = Buffer.from(b64, 'base64').toString('utf8').trim();
+    return /^https?:\/\//i.test(decoded) ? decoded : clean;
   } catch {
     return href;
   }
 };
-
 export default async function handler(req, res) {
   const { slug } = req.query;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
