@@ -1,4 +1,4 @@
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 
 const SOURCE_URL = process.env.LIST_URL || 'https://kusonime.com/list-anime-batch-sub-indo/';
 const PER_PAGE = 100;
@@ -21,9 +21,10 @@ async function loadAll() {
   });
   if (!r.ok) throw new Error(`Sumber membalas ${r.status}`);
 
-  const $ = cheerio.load(await r.text());
+  // PERBAIKAN IMPORT: Gunakan load langsung
+  const $ = load(await r.text());
   const seen = new Set();
-  const all = [];
+  const items = [];
 
   $('a[href]').each((_, a) => {
     let u;
@@ -34,18 +35,24 @@ async function loadAll() {
     if (parts.length !== 1) return;
 
     const slug = parts[0];
-    if (SKIP.has(slug.toLowerCase()) || !/^[a-z0-9-]+$/i.test(slug)) return;
+    // Sedikit toleransi regex (tambahkan titik/underscore barangkali ada slug unik)
+    if (SKIP.has(slug.toLowerCase()) || !/^[a-z0-9-_.]+$/i.test(slug)) return;
 
     const title = $(a).text().replace(/\s+/g, ' ').trim();
-    if (!title || seen.has(slug)) return;
+    if (!title) return;
 
+    // PERBAIKAN 1: Filter judul SEBELUM masuk 'seen'
+    // Mencegah link dari sidebar yang tidak ada tulisan "Subtitle Indonesia" membajak slug
+    if (!/subtitle indonesia/i.test(title)) return;
+
+    if (seen.has(slug)) return;
+    
     seen.add(slug);
-    all.push({ title, slug });
+    items.push({ title, slug });
   });
 
-  // Utamakan judul anime ("... Subtitle Indonesia"); kalau kosong, pakai semua
-  let items = all.filter(x => /subtitle indonesia/i.test(x.title));
-  if (!items.length) items = all;
+  // PERBAIKAN 2: Sortir array secara alfabetis (memastikan groupByLetter sempurna)
+  items.sort((a, b) => a.title.localeCompare(b.title, 'en', { numeric: true }));
 
   cache = { time: Date.now(), items };
   return items;
@@ -53,7 +60,7 @@ async function loadAll() {
 
 const letterOf = (title) => {
   const c = title.trim().charAt(0);
-  return /[a-z]/i.test(c) ? c.toUpperCase() : c; // "." "#" "0" "1" tetap apa adanya
+  return /[a-z]/i.test(c) ? c.toUpperCase() : c; 
 };
 
 function groupByLetter(items) {
