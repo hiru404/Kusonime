@@ -9,6 +9,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/detail/:slug", "destination": "/api/detail?slug=:slug" },
     { "source": "/kusonime/all-anime", "destination": "/api/all-anime" },
     { "source": "/kusonime/detail/:slug", "destination": "/api/detail?slug=:slug" }
   ]
