@@ -36,7 +36,6 @@ export default async function handler(req, res) {
     });
     if (!r.ok) return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
 
-    // PERBAIKAN: Gunakan fungsi load() secara langsung
     const $ = load(await r.text());
     const box = $('.lexot').first();
 
@@ -66,7 +65,8 @@ export default async function handler(req, res) {
     // download links
     const download_links = [];
     box.find('.smokeddlrh').each((_, block) => {
-      const title = $(block).find('.smokettlrh').text().trim();$(block).find('.smokeurlrh').each((_, row) => {
+      const title = $(block).find('.smokettlrh').text().trim();
+      $(block).find('.smokeurlrh').each((_, row) => {
         const links = $(row).find('a').map((_, a) => ({
           host: $(a).text().trim(),
           url: decodeLink($(a).attr('href'))
@@ -79,17 +79,26 @@ export default async function handler(req, res) {
       });
     });
 
-    // title (pakai judul blok download, fallback ke h1 / og:title)
-    const rawTitle = download_links[0]?.title
+    // title: utamakan judul postingan, blok download hanya cadangan
+    // (judul di blok download kadang salah ketik oleh admin Kusonime)
+    const rawTitle = $('.post-thumb h1.jdlz').first().text().trim()
+      || $('.post-thumb img').first().attr('title')
+      || $('meta[property="og:title"]').attr('content')
+      || download_links[0]?.title
       || $('h1').first().text().trim()
-      || $('meta[property="og:title"]').attr('content') || '';
+      || '';
     const title = rawTitle.replace(/\s*\|\s*Kusonime\s*$/i, '');
 
-    // poster
-    const poster = $('meta[property="og:image"]').attr('content')
-      || $('img[src*="wp-content/uploads"]').first().attr('src')
-      || $('img[data-src*="wp-content/uploads"]').first().attr('data-src')
+    // poster: thumbnail postingan, bukan og:image (di Kusonime isinya banner situs)
+    const thumb = $('.post-thumb img.wp-post-image').first();
+    let poster = thumb.attr('src')
+      || thumb.attr('data-src')
+      || $('.post-thumb img').first().attr('src')
+      || $('meta[property="og:image"]').attr('content')
       || '';
+
+    // opsional: ukuran asli (hapus akhiran -604x340), aktifkan kalau mau
+    // poster = poster.replace(/-\d+x\d+(?=\.\w+$)/, '');
 
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
     send(200, {
