@@ -1,4 +1,4 @@
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 
 const decodeLink = (href = '') => {
   try {
@@ -21,6 +21,7 @@ const decodeLink = (href = '') => {
     return href;
   }
 };
+
 export default async function handler(req, res) {
   const { slug } = req.query;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -35,7 +36,8 @@ export default async function handler(req, res) {
     });
     if (!r.ok) return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
 
-    const $ = cheerio.load(await r.text());
+    // PERBAIKAN: Gunakan fungsi load() secara langsung
+    const $ = load(await r.text());
     const box = $('.lexot').first();
 
     // info + genres
@@ -64,8 +66,7 @@ export default async function handler(req, res) {
     // download links
     const download_links = [];
     box.find('.smokeddlrh').each((_, block) => {
-      const title = $(block).find('.smokettlrh').text().trim();
-      $(block).find('.smokeurlrh').each((_, row) => {
+      const title = $(block).find('.smokettlrh').text().trim();$(block).find('.smokeurlrh').each((_, row) => {
         const links = $(row).find('a').map((_, a) => ({
           host: $(a).text().trim(),
           url: decodeLink($(a).attr('href'))
