@@ -21,22 +21,29 @@ const decodeLink = (href = '') => {
     return href;
   }
 };
+
 export default async function handler(req, res) {
   const { slug } = req.query;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   const send = (code, obj) => res.status(code).send(JSON.stringify(obj, null, 2));
+  const fail = (code, message) => send(code, { status: 'error', creator: 'hiru404', message });
 
-  if (!slug) return send(400, { status: 'error', creator: 'hiru404', message: 'slug wajib diisi' });
+  if (!slug || !/^[a-z0-9-]+$/i.test(slug)) {
+    return fail(400, 'slug tidak valid');
+  }
 
   try {
     const r = await fetch(`https://kusonime.com/${slug}/`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(8000)
     });
-    if (!r.ok) return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
+    if (!r.ok) return fail(r.status, `Sumber membalas ${r.status}`);
 
     const $ = cheerio.load(await r.text());
     const box = $('.lexot').first();
+
+    if (!box.length) return fail(404, 'Konten tidak ditemukan');
 
     // info + genres
     const info = {};
@@ -86,8 +93,7 @@ export default async function handler(req, res) {
 
     // poster
     const poster = $('meta[property="og:image"]').attr('content')
-      || $('img[src*="wp-content/uploads"]').first().attr('src')
-      || $('img[data-src*="wp-content/uploads"]').first().attr('data-src')
+      || $('.post-thumb img, .lexot img, article img').first().attr('src')
       || '';
 
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
@@ -98,6 +104,6 @@ export default async function handler(req, res) {
       detail: { title, poster, info, genres, synopsis, download_links }
     });
   } catch (e) {
-    send(500, { status: 'error', creator: 'hiru404', message: e.message });
+    fail(500, e.name === 'TimeoutError' ? 'Sumber terlalu lama merespons' : e.message);
   }
 }
