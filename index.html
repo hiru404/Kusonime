@@ -401,7 +401,7 @@ footer {
 
   <div class="drawer-label">Pengujian</div>
   <a href="/anime/kusonime/latest?page=1" target="_blank" rel="noopener">↗ &nbsp; Update Terbaru</a>
-  <a href="/anime/kusonime/all-anime?page=1" target="_blank" rel="noopener">↗ &nbsp; Semua Anime</a>
+  <a href="/api/all-anime?page=1" target="_blank" rel="noopener">↗ &nbsp; Semua Anime</a>
   <a href="/anime/kusonime/all-genres" target="_blank" rel="noopener">↗ &nbsp; Daftar Genre</a>
 </nav>
 
@@ -451,7 +451,7 @@ footer {
     <div class="cta">
       <a class="btn btn-primary" href="#endpoints">⌘ Jelajahi API</a>
       <a class="btn btn-secondary"
-         href="/anime/kusonime/all-anime?page=1"
+         href="/api/all-anime?page=1"
          target="_blank" rel="noopener">↗ Tes Semua Anime</a>
     </div>
   </section>
@@ -559,8 +559,8 @@ const ENDPOINTS = [
   },
   {
     title: 'List Semua Anime (A-Z)',
-    path: '/anime/kusonime/all-anime',
-    try: '/anime/kusonime/all-anime?page=1',
+    path: '/api/all-anime',
+    try: '/api/all-anime?page=1',
     desc: 'Mendapatkan daftar semua anime yang diurutkan berdasarkan judul.',
     param: 'Query opsional: ?page=1',
     icon: '▤'
@@ -623,8 +623,8 @@ const ENDPOINTS = [
   },
   {
     title: 'Detail Anime',
-    path: '/anime/kusonime/detail/:slug',
-    try: '/anime/kusonime/detail/fumetsu-no-anata-e-s2-subtitle-indonesia',
+    path: '/api/detail/:slug',
+    try: '/api/detail/red-river-batch-subtitle-indonesia',
     desc: 'Mendapatkan detail anime dan informasi link download.',
     param: 'Gunakan slug anime yang valid.',
     icon: '▧'
