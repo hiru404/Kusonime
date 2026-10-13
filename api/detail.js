@@ -11,13 +11,17 @@ const decodeLink = (href) => {
 
 export default async function handler(req, res) {
   const { slug } = req.query;
-  if (!slug) return res.status(400).json({ status: 'error', message: 'slug wajib diisi' });
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+  const send = (code, obj) => res.status(code).send(JSON.stringify(obj, null, 2));
+
+  if (!slug) return send(400, { status: 'error', creator: 'hiru404', message: 'slug wajib diisi' });
 
   try {
     const r = await fetch(`https://kusonime.com/${slug}/`, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     });
-    if (!r.ok) return res.status(r.status).json({ status: 'error', message: `Sumber membalas ${r.status}` });
+    if (!r.ok) return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
 
     const $ = cheerio.load(await r.text());
     const box = $('.lexot').first();
@@ -39,7 +43,8 @@ export default async function handler(req, res) {
     });
 
     // synopsis
-    const synopsis = box.children('p').map((_, p) => $(p).text().replace(/\u00a0/g, ' ').trim())
+    const synopsis = box.children('p')
+      .map((_, p) => $(p).text().replace(/\u00a0/g, ' ').trim())
       .get()
       .filter(t => t && !/^credit\s*:/i.test(t) && !/^download\s/i.test(t))
       .join('\n');
@@ -61,18 +66,26 @@ export default async function handler(req, res) {
       });
     });
 
-    const poster = $('meta[property="og:image"]').attr('content')
-      || box.find('img').first().attr('src') || '';
-    const title = $('h1').first().text().trim()
+    // title (pakai judul blok download, fallback ke h1 / og:title)
+    const rawTitle = download_links[0]?.title
+      || $('h1').first().text().trim()
       || $('meta[property="og:title"]').attr('content') || '';
+    const title = rawTitle.replace(/\s*\|\s*Kusonime\s*$/i, '');
+
+    // poster
+    const poster = $('meta[property="og:image"]').attr('content')
+      || $('img[src*="wp-content/uploads"]').first().attr('src')
+      || $('img[data-src*="wp-content/uploads"]').first().attr('data-src')
+      || '';
 
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
-    res.json({
+    send(200, {
       status: 'success',
+      creator: 'hiru404',
       source: 'Kusonime',
       detail: { title, poster, info, genres, synopsis, download_links }
     });
   } catch (e) {
-    res.status(500).json({ status: 'error', message: e.message });
+    send(500, { status: 'error', creator: 'hiru404', message: e.message });
   }
 }
