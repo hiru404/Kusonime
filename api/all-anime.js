@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 
-const SOURCE_URL = process.env.LIST_URL || 'https://kusonime.com/anime-list-batch/';
+const SOURCE_URL = process.env.LIST_URL || 'https://kusonime.com/list-anime-batch-sub-indo/';
 const PER_PAGE = 100;
 const CACHE_TTL = 30 * 60 * 1000; // 30 menit
 
