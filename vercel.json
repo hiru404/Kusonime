@@ -6,13 +6,31 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" }
       ]
+    },
+    {
+      "source": "/kusonime/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" }
+      ]
     }
   ],
   "rewrites": [
     { "source": "/api/detail/:slug", "destination": "/api/detail?slug=:slug" },
+    { "source": "/api/type/:type", "destination": "/api/type?type=:type" },
+    { "source": "/api/search/:query", "destination": "/api/search?query=:query" },
+    { "source": "/api/genre/:slug", "destination": "/api/genre?slug=:slug" },
+    { "source": "/api/season/:season/:year", "destination": "/api/season?season=:season&year=:year" },
+
+    { "source": "/kusonime/latest", "destination": "/api/latest" },
     { "source": "/kusonime/all-anime", "destination": "/api/all-anime" },
+    { "source": "/kusonime/movie", "destination": "/api/movie" },
+    { "source": "/kusonime/all-genres", "destination": "/api/all-genres" },
+    { "source": "/kusonime/all-seasons", "destination": "/api/all-seasons" },
     { "source": "/kusonime/detail/:slug", "destination": "/api/detail?slug=:slug" },
-  { "source": "/kusonime/latest", "destination": "/api/latest" },
-    { "source": "/kusonime/movie", "destination": "/api/movie" }
+    { "source": "/kusonime/type/:type", "destination": "/api/type?type=:type" },
+    { "source": "/kusonime/search/:query", "destination": "/api/search?query=:query" },
+    { "source": "/kusonime/genre/:slug", "destination": "/api/genre?slug=:slug" },
+    { "source": "/kusonime/season/:season/:year", "destination": "/api/season?season=:season&year=:year" }
   ]
 }
