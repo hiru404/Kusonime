@@ -15,11 +15,13 @@ export default async function handler(req, res) {
   try {
     const targetUrl = `${BASE}/`;
     
-    // Gunakan Proxy corsproxy.io untuk bypass 403 / blokir Cloudflare
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+    // PERBAIKAN: Gunakan CodeTabs Proxy
+    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
     
     const r = await fetch(proxyUrl, { 
       headers: { 
+        // Kadang proxy publik memblokir request jika User-Agent diubah secara manual, 
+        // tapi kita tetap sertakan standard browser headers agar aman.
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' 
       } 
     });
