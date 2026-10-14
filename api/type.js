@@ -48,39 +48,57 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = page === 1
+    const targetUrl = page === 1
       ? `${BASE}/seasons/${target}/`
       : `${BASE}/seasons/${target}/page/${page}/`;
 
-    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    // Gunakan Proxy AllOrigins untuk bypass 403
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+    const r = await fetch(proxyUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+      }
+    });
+
     if (r.status === 404) {
       return send(404, { status: 'error', creator: 'hiru404', message: `Halaman ${page} untuk tipe "${type}" tidak ditemukan` });
     }
     if (!r.ok) {
-      return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
+      return send(r.status, { status: 'error', creator: 'hiru404', message: `Proxy/Sumber membalas ${r.status}` });
     }
 
     const $ = load(await r.text());
     const anime_list = [];
 
-    $('.kover').each((_, el) => {
+    // Gunakan selector tahan banting seperti di Latest.js
+    $('.venz ul li, .kover, .venutama').each((_, el) => {
       const item = $(el);
 
-      const a = item.find('h2.episodeye a, h2 a').first();
-      const title = a.text().trim();
-      const slug = slugFromUrl(a.attr('href'));
+      const a = item.find('h2 a').first();
+      const href = a.attr('href') || item.find('.thumbz a').attr('href') || '';
+      
+      let title = a.text().trim();
+      if (!title) title = item.find('h2').text().trim();
+      
+      const slug = slugFromUrl(href);
       if (!title || !slug) return;
 
-      const img = item.find('img').first();
-      const poster = fullSizePoster(img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src') || '');
+      const img = item.find('.thumbz img, img').first();
+      const rawPoster = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src') || '';
+      const poster = fullSizePoster(rawPoster);
 
       const genres = item.find('a[href*="/genres/"]').map((_, g) => ({
         name: $(g).text().trim(),
         slug: genreSlug($(g).attr('href'))
       })).get().filter(g => g.name);
 
-      const m = item.text().replace(/\u00a0/g, ' ').match(/Released on\s*:\s*([^\n\r]+?)(?:\s{2,}|$)/i);
-      const released = m ? m[1].trim() : '';
+      let released = '';
+      const contentText = item.text().replace(/\u00a0/g, ' ');
+      const m = contentText.match(/Released(?: on)?\s*:\s*([^\n\r]+)/i);
+      if (m) {
+        released = m[1].replace(/(?:Genre|Season).*$/i, '').trim(); 
+      }
 
       anime_list.push({ title, slug, poster, genres, released });
     });
@@ -89,7 +107,7 @@ export default async function handler(req, res) {
       return send(502, {
         status: 'error',
         creator: 'hiru404',
-        message: 'Daftar anime tidak ditemukan. Struktur halaman Kusonime mungkin berubah.'
+        message: 'Daftar anime tidak ditemukan. Kusonime mungkin memblokir proxy atau halaman berubah.'
       });
     }
 
