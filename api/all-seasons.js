@@ -2,7 +2,7 @@ import { load } from 'cheerio';
 
 const BASE = 'https://kusonime.com';
 
-// https://kusonime.com/seasons/fall-2024/ -> fall-2024
+// Ekstrak slug dari URL: https://kusonime.com/seasons/fall-2024/ -> fall-2024
 const seasonSlug = (href = '') => {
   const m = String(href).match(/\/seasons\/([^/?#]+)/i);
   return m ? decodeURIComponent(m[1]) : '';
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   try {
     const targetUrl = `${BASE}/`;
     
-    // Gunakan Proxy untuk bypass 403/Cloudflare
+    // Gunakan Proxy corsproxy.io untuk bypass 403 / blokir Cloudflare
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
     
     const r = await fetch(proxyUrl, { 
@@ -30,16 +30,19 @@ export default async function handler(req, res) {
 
     const $ = load(await r.text());
 
-    // daftar season ada di widget "Seasons Anime" (sidebar): .tagcloud a.tag-cloud-link
+    // Daftar season ada di widget "Seasons Anime" (sidebar): .tagcloud a.tag-cloud-link
     let links = $('.tagcloud a[href*="/seasons/"]');
-    if (links.length === 0) links = $('a[href*="/seasons/"]'); // cadangan
+    if (links.length === 0) links = $('a[href*="/seasons/"]'); // fallback jika class berubah
 
     const seen = new Set();
     const seasons = [];
+    
     links.each((_, a) => {
       const name = $(a).text().replace(/\u00a0/g, ' ').trim();
       const slug = seasonSlug($(a).attr('href'));
+      
       if (!name || !slug || seen.has(slug)) return;
+      
       seen.add(slug);
       seasons.push({ name, slug });
     });
@@ -52,8 +55,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // urutan mengikuti urutan di situs (Anime Movie, ONA, OVA, Special, lalu Fall/Spring/Summer/Winter)
-    // season baru muncul tiap musim: cache 1 jam
+    // Urutkan season berdasarkan abjad (A-Z) agar rapi
+    seasons.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Cache 1 jam
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     send(200, {
       status: 'success',
