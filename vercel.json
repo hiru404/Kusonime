@@ -11,6 +11,8 @@
   "rewrites": [
     { "source": "/api/detail/:slug", "destination": "/api/detail?slug=:slug" },
     { "source": "/kusonime/all-anime", "destination": "/api/all-anime" },
-    { "source": "/kusonime/detail/:slug", "destination": "/api/detail?slug=:slug" }
+    { "source": "/kusonime/detail/:slug", "destination": "/api/detail?slug=:slug" },
+  { "source": "/kusonime/latest", "destination": "/api/latest" },
+    { "source": "/kusonime/movie", "destination": "/api/movie" }
   ]
 }
