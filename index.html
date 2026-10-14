@@ -217,31 +217,121 @@
     const MAX_PREVIEW = 20000; // batas karakter respons yang ditampilkan
 
     // ====== DAFTAR ENDPOINT (tambah di sini jika ada endpoint baru) ======
-    const endpoints = [
-      {
-        id: "all-anime",
-        title: "List Semua Anime (A-Z)",
-        method: "GET",
-        path: "/api/all-anime",
-        alias: "/kusonime/all-anime",
-        desc: "Mendapatkan daftar A-Z semua anime.",
-        params: [
-          { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
-        ]
-      },
-      {
-        id: "detail",
-        title: "Detail Anime",
-        method: "GET",
-        path: "/api/detail/:slug",
-        alias: "/kusonime/detail/:slug",
-        desc: "Mendapatkan detail, poster, sinopsis, dan link download.",
-        params: [
-          { name: "slug", in: "path", label: "slug", hint: "wajib", value: "red-river-batch-subtitle-indonesia", placeholder: "slug-anime" }
-        ]
-      }
-    ];
+const endpoints = [
+  {
+    id: "latest",
+    title: "Update Terbaru (Home)",
+    method: "GET",
+    path: "/api/latest",
+    alias: "/kusonime/latest",
+    desc: "Mendapatkan daftar anime terbaru.",
+    params: [
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "all-anime",
+    title: "List Semua Anime (A-Z)",
+    method: "GET",
+    path: "/api/all-anime",
+    alias: "/kusonime/all-anime",
+    desc: "Mendapatkan daftar A-Z semua anime.",
+    params: [
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "movie",
+    title: "List Movie (A-Z)",
+    method: "GET",
+    path: "/api/movie",
+    alias: "/kusonime/movie",
+    desc: "Mendapatkan daftar A-Z semua movie.",
+    params: [
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "type",
+    title: "List per Tipe",
+    method: "GET",
+    path: "/api/type/:type",
+    alias: "/kusonime/type/:type",
+    desc: "Mendapatkan list OVA, ONA, Special, atau Movie.",
+    params: [
+      { name: "type", in: "path", label: "type", hint: "ova, ona, special, movie", value: "ova", placeholder: "ova" },
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "all-genres",
+    title: "Daftar Semua Genre",
+    method: "GET",
+    path: "/api/all-genres",
+    alias: "/kusonime/all-genres",
+    desc: "Mendapatkan semua genre yang tersedia.",
+    params: []
+  },
+  {
+    id: "all-seasons",
+    title: "Daftar Semua Musim",
+    method: "GET",
+    path: "/api/all-seasons",
+    alias: "/kusonime/all-seasons",
+    desc: "Mendapatkan semua musim/tahun rilis.",
+    params: []
+  },
+  {
+    id: "search",
+    title: "Pencarian Anime",
+    method: "GET",
+    path: "/api/search/:query",
+    alias: "/kusonime/search/:query",
+    desc: "Mencari anime berdasarkan judul.",
+    params: [
+      { name: "query", in: "path", label: "query", hint: "wajib", value: "fumetsu", placeholder: "judul anime" },
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "genre",
+    title: "Anime per Genre",
+    method: "GET",
+    path: "/api/genre/:slug",
+    alias: "/kusonime/genre/:slug",
+    desc: "Mendapatkan anime berdasarkan genre.",
+    params: [
+      { name: "slug", in: "path", label: "slug", hint: "wajib, contoh: action", value: "action", placeholder: "action" },
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "season",
+    title: "Anime per Musim",
+    method: "GET",
+    path: "/api/season/:season/:year",
+    alias: "/kusonime/season/:season/:year",
+    desc: "Mendapatkan anime berdasarkan musim dan tahun rilis.",
+    params: [
+      { name: "season", in: "path", label: "season", hint: "winter, spring, summer, fall", value: "fall", placeholder: "fall" },
+      { name: "year", in: "path", label: "year", hint: "4 digit", value: "2024", placeholder: "2024" },
+      { name: "page", in: "query", label: "page", hint: "opsional", value: "1", placeholder: "1" }
+    ]
+  },
+  {
+    id: "detail",
+    title: "Detail Anime",
+    method: "GET",
+    path: "/api/detail/:slug",
+    alias: "/kusonime/detail/:slug",
+    desc: "Mendapatkan detail, poster, sinopsis, dan link download.",
+    params: [
+      { name: "slug", in: "path", label: "slug", hint: "wajib", value: "red-river-batch-subtitle-indonesia", placeholder: "slug-anime" }
+    ]
+  }
+];
 
+    
     const $ = (id) => document.getElementById(id);
     const grid = $("endpointGrid");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
