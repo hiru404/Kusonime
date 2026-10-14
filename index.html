@@ -1,932 +1,965 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b1020">
-<title>Dashboard API - Kusonime API</title>
-<meta name="description" content="Dokumentasi Kusonime API gratis untuk daftar anime, pencarian, genre, musim, detail, dan link download.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b14">
+  <meta name="description" content="Kusonime API - API anime gratis untuk developer.">
+  <title>Kusonime API — Free Anime API</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080b14;
+      --panel: #101625;
+      --panel2: #141c2e;
+      --border: rgba(255,255,255,.09);
+      --text: #edf2ff;
+      --muted: #96a3bb;
+      --primary: #8b5cf6;
+      --secondary: #22d3ee;
+      --green: #34d399;
+      --radius: 18px;
+    }
 
-<style>
-:root {
-  color-scheme: dark;
-  --bg: #090e1b;
-  --surface: #10182a;
-  --card: #131e33;
-  --card-hover: #192740;
-  --line: #273650;
-  --text: #edf3ff;
-  --muted: #93a2bd;
-  --accent: #7c83ff;
-  --accent2: #40d9e8;
-  --success: #34d399;
-  --danger: #fb7185;
-  --header: rgba(9,14,27,.86);
-  --shadow: 0 14px 40px rgba(0,0,0,.15);
-}
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f4f6fc;
-  --surface: #fff;
-  --card: #fff;
-  --card-hover: #f0f3ff;
-  --line: #e0e6f1;
-  --text: #172039;
-  --muted: #71809a;
-  --accent: #5b5fe9;
-  --accent2: #078ca7;
-  --success: #059669;
-  --danger: #e11d48;
-  --header: rgba(255,255,255,.88);
-  --shadow: 0 14px 40px rgba(28,42,80,.06);
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: 90px; }
-body {
-  min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 50% -15%, rgba(124,131,255,.16), transparent 48%),
-    var(--bg);
-  color: var(--text);
-  font-family: Poppins, system-ui, sans-serif;
-  line-height: 1.6;
-  transition: background .2s, color .2s;
-}
-button, input { font: inherit; }
-button, a { -webkit-tap-highlight-color: transparent; }
-a { color: inherit; text-decoration: none; }
-button { color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 4px;
-}
-.container { width: min(1120px, calc(100% - 36px)); margin-inline: auto; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-/* Header */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--header);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--line);
-}
-.header-inner {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-.brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
-.brand-icon {
-  width: 42px; height: 42px; flex-shrink: 0;
-  display: grid; place-items: center;
-  border-radius: 13px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; font-size: 21px; font-weight: 800;
-  box-shadow: 0 5px 20px rgba(124,131,255,.2);
-}
-.brand-name { font-size: 1rem; font-weight: 800; letter-spacing: -.4px; }
-.brand-sub { color: var(--muted); font-size: .7rem; }
-.header-actions { display: flex; align-items: center; gap: 9px; }
-.icon-btn {
-  width: 42px; height: 42px;
-  display: grid; place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--card);
-  cursor: pointer; font-size: 18px;
-  transition: .2s;
-}
-.icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
-.menu-btn { display: none; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 10% 0%, rgba(139,92,246,.13), transparent 35%),
+        radial-gradient(ellipse at 90% 15%, rgba(34,211,238,.09), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
 
-/* Drawer */
-.scrim {
-  position: fixed; inset: 0; z-index: 60;
-  background: rgba(0,0,0,.55);
-  opacity: 0; visibility: hidden; transition: .25s;
-}
-.scrim.open { opacity: 1; visibility: visible; }
-.drawer {
-  position: fixed; z-index: 70; inset: 0 auto 0 0;
-  width: min(300px, 85vw); padding: 25px 18px;
-  background: var(--surface); border-right: 1px solid var(--line);
-  transform: translateX(-105%); transition: transform .25s;
-  overflow-y: auto;
-}
-.drawer.open { transform: translateX(0); }
-.drawer-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 28px;
-}
-.drawer-label {
-  color: var(--muted); font-size: .72rem; font-weight: 700;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  margin: 22px 10px 8px;
-}
-.drawer a {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px; border-radius: 11px;
-  font-size: .9rem; font-weight: 500;
-  transition: .2s;
-}
-.drawer a:hover { background: var(--card-hover); color: var(--accent2); }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-/* Hero */
-.hero { padding: 78px 0 20px; text-align: center; }
-.eyebrow {
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 7px 13px; border: 1px solid var(--line);
-  border-radius: 100px; background: var(--surface);
-  color: var(--muted); font-size: .76rem; font-weight: 600;
-}
-.pulse {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 12px var(--success);
-}
-.hero h1 {
-  margin-top: 24px;
-  font-size: clamp(2.2rem, 7vw, 4.5rem);
-  font-weight: 800; letter-spacing: -2px; line-height: 1.12;
-  overflow-wrap: anywhere;
-}
-.gradient {
-  background: linear-gradient(100deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
-}
-.caret {
-  display: inline-block; width: 3px; height: .8em;
-  background: var(--accent2); margin-left: 5px;
-  vertical-align: -.02em; animation: blink 1s steps(1) infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
-.hero-desc {
-  max-width: 650px; margin: 22px auto 0;
-  color: var(--muted); font-size: .98rem;
-}
-.hero-desc strong { color: var(--text); font-weight: 600; }
-.hero-meta {
-  display: flex; justify-content: center; flex-wrap: wrap;
-  gap: 10px 20px; margin-top: 20px;
-  color: var(--muted); font-size: .78rem;
-}
-.hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
-.cta {
-  display: flex; justify-content: center; flex-wrap: wrap;
-  gap: 12px; margin-top: 30px;
-}
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 9px; padding: 12px 19px; border-radius: 12px;
-  border: 1px solid var(--line); font-weight: 600; font-size: .88rem;
-  cursor: pointer; transition: .2s;
-}
-.btn:hover { transform: translateY(-2px); }
-.btn-primary {
-  background: linear-gradient(110deg, var(--accent), #676df0);
-  color: #fff; border-color: transparent;
-  box-shadow: 0 7px 22px rgba(124,131,255,.2);
-}
-.btn-secondary { background: var(--surface); }
-.btn-secondary:hover { border-color: var(--accent); }
+    button, input {
+      font: inherit;
+    }
 
-/* Stats */
-.stats {
-  display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 16px; margin-top: 58px;
-}
-.stat {
-  min-width: 0; padding: 22px;
-  border: 1px solid var(--line); border-radius: 17px;
-  background: var(--surface); box-shadow: var(--shadow);
-}
-.stat-top { display: flex; align-items: center; gap: 12px; }
-.stat-icon {
-  width: 45px; height: 45px; flex-shrink: 0;
-  display: grid; place-items: center;
-  border-radius: 13px; background: rgba(124,131,255,.12);
-  font-size: 21px;
-}
-.stat-label { color: var(--muted); font-size: .74rem; }
-.stat-value { font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
-.stat-sub { margin-top: 13px; color: var(--muted); font-size: .76rem; }
-.dot {
-  display: inline-block; width: 8px; height: 8px;
-  border-radius: 50%; background: var(--muted); margin-right: 7px;
-}
-.dot.ok { background: var(--success); box-shadow: 0 0 9px var(--success); }
-.dot.err { background: var(--danger); }
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-/* Endpoints */
-.endpoints { padding-top: 75px; }
-.section-head {
-  display: flex; align-items: end; justify-content: space-between;
-  gap: 18px; margin-bottom: 23px;
-}
-.section-kicker {
-  color: var(--accent2); text-transform: uppercase;
-  letter-spacing: 1.5px; font-size: .7rem; font-weight: 700;
-}
-.section-title { font-size: clamp(1.35rem, 4vw, 1.85rem); font-weight: 800; }
-.section-desc { color: var(--muted); font-size: .84rem; margin-top: 5px; }
-.endpoint-count {
-  white-space: nowrap; padding: 7px 11px; border-radius: 9px;
-  border: 1px solid var(--line); color: var(--muted);
-  background: var(--surface); font-size: .75rem; font-weight: 600;
-}
-.toolbar {
-  display: flex; gap: 12px; margin-bottom: 20px;
-}
-.search-wrap { position: relative; flex: 1; min-width: 0; }
-.search-icon {
-  position: absolute; left: 15px; top: 50%;
-  transform: translateY(-50%); pointer-events: none;
-}
-.search-input {
-  width: 100%; min-height: 47px;
-  padding: 11px 14px 11px 43px;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: 12px; color: var(--text); font-size: .85rem;
-}
-.search-input::placeholder { color: var(--muted); }
-.search-input:focus { border-color: var(--accent); outline: none; }
-.endpoint-grid {
-  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 16px;
-}
-.endpoint {
-  min-width: 0; display: flex; flex-direction: column; gap: 12px;
-  padding: 20px; border-radius: 16px;
-  background: var(--card); border: 1px solid var(--line);
-  transition: transform .2s, border-color .2s, background .2s;
-}
-.endpoint:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent); background: var(--card-hover);
-}
-.endpoint-top { display: flex; align-items: flex-start; gap: 12px; }
-.endpoint-number {
-  width: 39px; height: 39px; flex-shrink: 0;
-  display: grid; place-items: center; border-radius: 11px;
-  background: rgba(124,131,255,.13); color: var(--accent);
-  font-family: "Space Mono", monospace; font-size: .8rem; font-weight: 700;
-}
-.endpoint-title { font-size: .96rem; font-weight: 700; line-height: 1.5; }
-.endpoint-desc { color: var(--muted); font-size: .81rem; }
-.method {
-  display: inline-flex; width: fit-content;
-  align-items: center; padding: 3px 7px;
-  background: rgba(52,211,153,.12); color: var(--success);
-  border-radius: 5px; font-family: "Space Mono", monospace;
-  font-size: .66rem; font-weight: 700; margin-bottom: 6px;
-}
-.endpoint-url {
-  display: block; padding: 11px 12px; border-radius: 9px;
-  border: 1px solid var(--line); background: var(--bg);
-  color: var(--accent2); font-family: "Space Mono", monospace;
-  font-size: .72rem; overflow-wrap: anywhere; line-height: 1.8;
-}
-.param-info {
-  color: var(--muted); font-size: .73rem;
-  overflow-wrap: anywhere;
-}
-.endpoint-actions {
-  display: flex; gap: 9px; margin-top: auto; padding-top: 4px;
-}
-.endpoint-actions a, .endpoint-actions button {
-  flex: 1; min-width: 0; display: inline-flex;
-  align-items: center; justify-content: center; gap: 6px;
-  padding: 9px 10px; border-radius: 9px;
-  border: 1px solid var(--line); background: transparent;
-  color: var(--text); font-size: .76rem; font-weight: 600;
-  cursor: pointer; transition: .2s;
-}
-.endpoint-actions a {
-  color: var(--accent2); border-color: rgba(64,217,232,.35);
-}
-.endpoint-actions a:hover { background: var(--accent2); color: #071522; }
-.endpoint-actions button:hover { border-color: var(--accent); color: var(--accent); }
-.empty-state {
-  display: none; grid-column: 1 / -1; text-align: center;
-  padding: 45px 20px; border: 1px dashed var(--line);
-  border-radius: 14px; color: var(--muted);
-}
-.empty-state.show { display: block; }
+    .container {
+      width: min(1120px, calc(100% - 36px));
+      margin-inline: auto;
+    }
 
-/* Footer & notification */
-footer {
-  margin-top: 80px; padding: 27px 18px 35px;
-  border-top: 1px solid var(--line);
-  text-align: center; color: var(--muted); font-size: .78rem;
-}
-.footer-brand { color: var(--text); font-weight: 700; }
-.footer-note { margin-top: 5px; }
-.toast {
-  position: fixed; z-index: 100; left: 50%; bottom: 25px;
-  transform: translate(-50%, 15px);
-  background: var(--success); color: #05281d;
-  padding: 11px 17px; border-radius: 11px;
-  font-size: .82rem; font-weight: 700;
-  opacity: 0; visibility: hidden; transition: .22s;
-  box-shadow: var(--shadow); max-width: calc(100% - 30px);
-  text-align: center;
-}
-.toast.show { opacity: 1; visibility: visible; transform: translate(-50%,0); }
+    /* NAVBAR */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,11,20,.82);
+      backdrop-filter: blur(16px);
+    }
 
-@media (min-width: 900px) {
-  .endpoint-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-}
-@media (max-width: 650px) {
-  .container { width: calc(100% - 28px); }
-  .header-inner { min-height: 62px; }
-  .brand-icon { width: 38px; height: 38px; }
-  .brand-name { font-size: .9rem; }
-  .brand-sub { font-size: .65rem; }
-  .menu-btn { display: grid; }
-  .hero { padding-top: 57px; }
-  .hero h1 { letter-spacing: -1.3px; }
-  .hero-desc { font-size: .88rem; }
-  .stats { grid-template-columns: 1fr; gap: 11px; margin-top: 40px; }
-  .stat { padding: 16px; }
-  .stat-sub { margin-top: 8px; }
-  .endpoints { padding-top: 58px; }
-  .section-head { align-items: flex-start; }
-  .section-desc { max-width: 300px; }
-  .toolbar { flex-direction: column; }
-  .endpoint-grid { grid-template-columns: 1fr; gap: 12px; }
-  .endpoint { padding: 17px; }
-  .cta .btn { flex: 1 1 100%; }
-  footer { margin-top: 60px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
-  }
-}
-</style>
+    .nav-inner {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .brand-icon {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 21px;
+      box-shadow: 0 6px 24px rgba(139,92,246,.25);
+    }
+
+    .brand span:last-child {
+      color: var(--secondary);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    .nav-button {
+      padding: 9px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: white;
+      background: var(--panel);
+    }
+
+    /* HERO */
+    .hero {
+      padding: 95px 0 65px;
+      text-align: center;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 13px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(52,211,153,.22);
+      border-radius: 999px;
+      color: #a7f3d0;
+      background: rgba(52,211,153,.07);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    .hero h1 {
+      min-height: 1.35em;
+      margin-bottom: 20px;
+      font-size: clamp(30px, 6.5vw, 62px);
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: -2px;
+      overflow-wrap: anywhere;
+    }
+
+    .gradient {
+      background: linear-gradient(100deg, #c4b5fd, #818cf8, #67e8f9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .caret {
+      display: inline-block;
+      width: 3px;
+      height: .9em;
+      margin-left: 5px;
+      vertical-align: -.05em;
+      background: var(--secondary);
+      animation: blink .8s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
+
+    .hero-description {
+      max-width: 650px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 45px;
+      padding: 11px 19px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: white;
+      background: var(--panel);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s, border-color .2s, opacity .2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139,92,246,.7);
+    }
+
+    .btn-primary {
+      border: 0;
+      background: linear-gradient(110deg, #7c3aed, #6366f1);
+      box-shadow: 0 8px 26px rgba(124,58,237,.23);
+    }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 12px 0 65px;
+    }
+
+    .stat-card {
+      padding: 23px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(20,28,46,.92), rgba(13,18,31,.9));
+      text-align: center;
+    }
+
+    .stat-icon {
+      margin-bottom: 7px;
+      font-size: 22px;
+    }
+
+    .stat-number {
+      font-size: 27px;
+      font-weight: 850;
+      letter-spacing: -.7px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* SECTIONS */
+    .section {
+      padding: 0 0 70px;
+      scroll-margin-top: 95px;
+    }
+
+    .section-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 23px;
+    }
+
+    .eyebrow {
+      margin-bottom: 5px;
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(23px, 4vw, 32px);
+      line-height: 1.3;
+      letter-spacing: -.7px;
+    }
+
+    .section-heading p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* SEARCH */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 390px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+    }
+
+    .search-box input {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 0;
+      border: 0;
+      outline: 0;
+      color: white;
+      background: transparent;
+      font-size: 13px;
+    }
+
+    .search-box input::placeholder {
+      color: #75819a;
+    }
+
+    /* ENDPOINT CARDS */
+    .endpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 17px;
+    }
+
+    .endpoint-card {
+      min-width: 0;
+      padding: 21px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(20,28,46,.94), rgba(13,18,31,.94));
+      transition: border-color .2s, transform .2s;
+    }
+
+    .endpoint-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(139,92,246,.45);
+    }
+
+    .endpoint-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .endpoint-top h3 {
+      font-size: 16px;
+    }
+
+    .method {
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #6ee7b7;
+      background: rgba(52,211,153,.1);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .7px;
+    }
+
+    .endpoint-description {
+      min-height: 43px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .endpoint-url {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 10px;
+      background: rgba(0,0,0,.2);
+    }
+
+    .endpoint-url code {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #c4b5fd;
+      font-size: 12px;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: #dce5fa;
+      background: var(--panel2);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--secondary);
+    }
+
+    .try-link {
+      display: inline-block;
+      margin-top: 13px;
+      color: var(--secondary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 35px 15px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* EXAMPLE */
+    .example-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #0d1220;
+    }
+
+    .example-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dots i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #475569;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 21px;
+      color: #b9c7e5;
+      font: 12px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre;
+    }
+
+    .code-purple { color: #c4b5fd; }
+    .code-green { color: #86efac; }
+    .code-blue { color: #7dd3fc; }
+
+    /* FOOTER */
+    footer {
+      padding: 27px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    footer strong {
+      color: var(--secondary);
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        width: min(100% - 28px, 560px);
+      }
+
+      .nav-inner {
+        min-height: 63px;
+      }
+
+      .nav-links {
+        gap: 13px;
+        font-size: 12px;
+      }
+
+      .nav-links .nav-button {
+        padding: 7px 10px;
+      }
+
+      .hero {
+        padding: 70px 0 48px;
+      }
+
+      .hero h1 {
+        letter-spacing: -1.2px;
+      }
+
+      .hero-description {
+        font-size: 14px;
+      }
+
+      .stats {
+        gap: 9px;
+        margin-bottom: 52px;
+      }
+
+      .stat-card {
+        padding: 16px 7px;
+      }
+
+      .stat-number {
+        font-size: 22px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+      }
+
+      .endpoint-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .endpoint-description {
+        min-height: auto;
+      }
+
+      .section {
+        padding-bottom: 52px;
+      }
+
+      .section-heading {
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .brand {
+        gap: 7px;
+        font-size: 15px;
+      }
+
+      .brand-icon {
+        width: 33px;
+        height: 33px;
+      }
+
+      .nav-links {
+        gap: 9px;
+      }
+
+      .nav-links a:first-child {
+        display: none;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .stat-icon {
+        margin: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand" aria-label="Kusonime API Home">
+        <span class="brand-icon">✦</span>
+        <span>Kusonime <span>API</span></span>
+      </a>
 
-<div class="scrim" id="scrim"></div>
+      <nav class="nav-links" aria-label="Navigasi utama">
+        <a href="#home">Home</a>
+        <a href="#endpoints">Endpoints</a>
+        <a href="#example" class="nav-button">Dokumentasi ↗</a>
+      </nav>
+    </div>
+  </header>
 
-<nav class="drawer" id="drawer" aria-label="Navigasi utama" aria-hidden="true">
-  <div class="drawer-head">
-    <div class="brand">
-      <div class="brand-icon">K</div>
-      <div>
-        <div class="brand-name">Kusonime API</div>
-        <div class="brand-sub">Developer Dashboard</div>
+  <main>
+    <section class="hero container" id="home">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        FREE API FOR DEVELOPERS
       </div>
-    </div>
-    <button class="icon-btn" id="closeMenu" aria-label="Tutup menu">✕</button>
-  </div>
 
-  <div class="drawer-label">Navigasi</div>
-  <a href="#top">⌂ &nbsp; Beranda</a>
-  <a href="#stats">▦ &nbsp; Status API</a>
-  <a href="#endpoints">⌘ &nbsp; Semua Endpoints</a>
+      <h1>
+        <span class="gradient" id="typed">WELCOME TO KUSONIME API</span>
+        <span class="caret" aria-hidden="true"></span>
+      </h1>
 
-  <div class="drawer-label">Pengujian</div>
-  <a href="/anime/kusonime/latest?page=1" target="_blank" rel="noopener">↗ &nbsp; Update Terbaru</a>
-  <a href="/api/all-anime?page=1" target="_blank" rel="noopener">↗ &nbsp; Semua Anime</a>
-  <a href="/anime/kusonime/all-genres" target="_blank" rel="noopener">↗ &nbsp; Daftar Genre</a>
-</nav>
+      <p class="hero-description">
+        API anime gratis untuk kebutuhan proyek kamu.
+        Jelajahi informasi anime melalui endpoint yang mudah digunakan.
+      </p>
 
-<header class="header" id="top">
-  <div class="container header-inner">
-    <button class="icon-btn menu-btn" id="menuBtn"
-      aria-label="Buka menu" aria-expanded="false">☰</button>
-
-    <a href="#top" class="brand" aria-label="Kusonime API Beranda">
-      <div class="brand-icon">K</div>
-      <div>
-        <div class="brand-name">Kusonime API</div>
-        <div class="brand-sub">REST API Documentation</div>
+      <div class="hero-actions">
+        <a href="#endpoints" class="btn btn-primary">Jelajahi Endpoints ↗</a>
+        <a href="#example" class="btn">Lihat Contoh Kode</a>
       </div>
-    </a>
+    </section>
 
-    <div class="header-actions">
-      <a class="icon-btn" href="#endpoints" aria-label="Lihat endpoints">⌘</a>
-      <button class="icon-btn" id="themeBtn" aria-label="Ganti tema"
-        title="Ganti tema">☼</button>
-    </div>
-  </div>
-</header>
-
-<main class="container">
-
-  <section class="hero">
-    <div class="eyebrow">
-      <span class="pulse"></span>
-      FREE PUBLIC API
-    </div>
-
-    <h1><span class="gradient" id="typed">WELCOME</span><span class="caret"></span></h1>
-
-    <p class="hero-desc">
-      Pusat layanan <strong>API gratis</strong> untuk data anime
-      <strong>Kusonime</strong>. Akses daftar anime, pencarian, genre,
-      musim, detail anime, dan informasi link download melalui respons JSON.
-    </p>
-
-    <div class="hero-meta">
-      <span>✦ REST API</span>
-      <span>▣ JSON Response</span>
-      <span>⌘ Developer Friendly</span>
-    </div>
-
-    <div class="cta">
-      <a class="btn btn-primary" href="#endpoints">⌘ Jelajahi API</a>
-      <a class="btn btn-secondary"
-         href="/api/all-anime?page=1"
-         target="_blank" rel="noopener">↗ Tes Semua Anime</a>
-    </div>
-  </section>
-
-  <section class="stats" id="stats" aria-label="Informasi API">
-    <article class="stat">
-      <div class="stat-top">
-        <div class="stat-icon">◉</div>
+    <section class="container stats" aria-label="Informasi API">
+      <article class="stat-card">
+        <div class="stat-icon">⚡</div>
         <div>
-          <div class="stat-label">Status Layanan</div>
-          <div class="stat-value">
-            <span class="dot" id="statusDot"></span>
-            <span id="statusText">Memeriksa API...</span>
+          <div class="stat-number">REST</div>
+          <div class="stat-label">API Architecture</div>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon">🌐</div>
+        <div>
+          <div class="stat-number">JSON</div>
+          <div class="stat-label">Response Format</div>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon">🎌</div>
+        <div>
+          <div class="stat-number">FREE</div>
+          <div class="stat-label">Untuk Developer</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="container section" id="endpoints">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">API Documentation</div>
+          <h2>Daftar Endpoints</h2>
+          <p>Temukan endpoint yang kamu butuhkan.</p>
+        </div>
+
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input
+            type="search"
+            id="endpointSearch"
+            placeholder="Cari endpoint..."
+            aria-label="Cari endpoint"
+          >
+        </label>
+      </div>
+
+      <div class="endpoint-grid" id="endpointGrid">
+        <!--
+          Ganti nilai url dengan endpoint API yang benar-benar aktif.
+          URL contoh di bawah adalah placeholder dokumentasi.
+        -->
+
+        <article class="endpoint-card" data-search="anime list daftar anime">
+          <div class="endpoint-top">
+            <h3>Anime List</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Mengambil daftar anime yang tersedia dari sumber API kamu.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/anime</code>
+            <button class="copy-btn" data-copy="/api/anime">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+
+        <article class="endpoint-card" data-search="anime detail informasi">
+          <div class="endpoint-top">
+            <h3>Anime Detail</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Mengambil informasi detail anime berdasarkan slug atau ID.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/anime/:slug</code>
+            <button class="copy-btn" data-copy="/api/anime/:slug">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+
+        <article class="endpoint-card" data-search="search pencarian anime">
+          <div class="endpoint-top">
+            <h3>Search Anime</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Mencari anime berdasarkan kata kunci judul.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/search?q=naruto</code>
+            <button class="copy-btn" data-copy="/api/search?q=naruto">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+
+        <article class="endpoint-card" data-search="ongoing terbaru anime">
+          <div class="endpoint-top">
+            <h3>Ongoing Anime</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Mendapatkan daftar anime ongoing atau anime terbaru.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/ongoing</code>
+            <button class="copy-btn" data-copy="/api/ongoing">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+
+        <article class="endpoint-card" data-search="genre kategori anime">
+          <div class="endpoint-top">
+            <h3>Anime Genres</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Mendapatkan daftar genre atau kategori anime.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/genres</code>
+            <button class="copy-btn" data-copy="/api/genres">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+
+        <article class="endpoint-card" data-search="schedule jadwal anime">
+          <div class="endpoint-top">
+            <h3>Anime Schedule</h3>
+            <span class="method">GET</span>
+          </div>
+          <p class="endpoint-description">
+            Endpoint untuk informasi jadwal rilis anime.
+          </p>
+          <div class="endpoint-url">
+            <code>/api/schedule</code>
+            <button class="copy-btn" data-copy="/api/schedule">Salin</button>
+          </div>
+          <a class="try-link" href="#example">Lihat contoh ↓</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="container section" id="example">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Quick Start</div>
+          <h2>Contoh Penggunaan</h2>
+          <p>Contoh request menggunakan JavaScript Fetch.</p>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <span>JavaScript · Fetch API</span>
+          <div class="window-dots" aria-hidden="true">
+            <i></i><i></i><i></i>
           </div>
         </div>
-      </div>
-      <div class="stat-sub" id="statusMs">Menunggu respons server</div>
-    </article>
 
-    <article class="stat">
-      <div class="stat-top">
-        <div class="stat-icon">◷</div>
-        <div>
-          <div class="stat-label">Waktu Indonesia Barat</div>
-          <div class="stat-value" id="clock">--:--:-- WIB</div>
-        </div>
-      </div>
-      <div class="stat-sub" id="date">Memuat tanggal...</div>
-    </article>
+        <pre><code><span class="code-purple">const</span> API_BASE = <span class="code-green">'https://domain-kamu.com'</span>;
 
-    <article class="stat">
-      <div class="stat-top">
-        <div class="stat-icon">⌘</div>
-        <div>
-          <div class="stat-label">API Endpoints</div>
-          <div class="stat-value" id="epCount">10 Endpoints</div>
-        </div>
-      </div>
-      <div class="stat-sub">Format respons: JSON</div>
-    </article>
-  </section>
-
-  <section class="endpoints" id="endpoints">
-    <div class="section-head">
-      <div>
-        <div class="section-kicker">API Documentation</div>
-        <h2 class="section-title">🚀 Kusonime API Endpoints</h2>
-        <p class="section-desc">
-          Pilih endpoint untuk melihat respons API atau salin URL untuk proyekmu.
-        </p>
-      </div>
-      <span class="endpoint-count" id="visibleCount">10 tersedia</span>
-    </div>
-
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">⌕</span>
-        <input class="search-input" id="searchInput" type="search"
-          placeholder="Cari endpoint, genre, detail anime..."
-          aria-label="Cari endpoint">
-      </div>
-    </div>
-
-    <div class="endpoint-grid" id="grid">
-      <div class="empty-state" id="emptyState">
-        <div style="font-size:2rem;margin-bottom:8px">⌕</div>
-        <strong>Endpoint tidak ditemukan</strong>
-        <p style="margin-top:5px">Coba kata kunci lainnya.</p>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  <div class="footer-brand">Kusonime API</div>
-  <div class="footer-note">
-    © <span id="year"></span> · Developer Dashboard
-  </div>
-  <div class="footer-note">
-    Sumber data: kusonime.com · Gunakan API secara bertanggung jawab.
-  </div>
-</footer>
-
-<div class="toast" id="toast" role="status" aria-live="polite">
-  URL berhasil disalin!
-</div>
-
-<script>
-'use strict';
-
-/*
- * Daftar endpoint.
- * URL di bawah mengikuti route yang diberikan.
- * Route harus tersedia di server/backend agar dapat digunakan.
- */
-const ENDPOINTS = [
-  {
-    title: 'Update Terbaru (Home)',
-    path: '/anime/kusonime/latest',
-    try: '/anime/kusonime/latest?page=1',
-    desc: 'Mendapatkan daftar anime terbaru dari halaman utama.',
-    param: 'Query opsional: ?page=1',
-    icon: '◷'
-  },
-  {
-    title: 'List Semua Anime (A-Z)',
-    path: '/api/all-anime',
-    try: '/api/all-anime?page=1',
-    desc: 'Mendapatkan daftar semua anime yang diurutkan berdasarkan judul.',
-    param: 'Query opsional: ?page=1',
-    icon: '▤'
-  },
-  {
-    title: 'List Movie (A-Z)',
-    path: '/anime/kusonime/movie',
-    try: '/anime/kusonime/movie?page=1',
-    desc: 'Mendapatkan daftar film anime atau movie.',
-    param: 'Query opsional: ?page=1',
-    icon: '▶'
-  },
-  {
-    title: 'List Anime per Tipe',
-    path: '/anime/kusonime/type/:type',
-    try: '/anime/kusonime/type/ova?page=1',
-    desc: 'Mendapatkan daftar anime berdasarkan tipe penayangan.',
-    param: 'Contoh: /type/ova, /type/ona, /type/special',
-    icon: '▣'
-  },
-  {
-    title: 'Daftar Semua Genre',
-    path: '/anime/kusonime/all-genres',
-    try: '/anime/kusonime/all-genres',
-    desc: 'Mendapatkan semua genre anime yang tersedia.',
-    param: 'Tanpa parameter wajib',
-    icon: '◈'
-  },
-  {
-    title: 'Daftar Semua Musim',
-    path: '/anime/kusonime/all-seasons',
-    try: '/anime/kusonime/all-seasons',
-    desc: 'Mendapatkan daftar musim dan tahun rilis anime.',
-    param: 'Tanpa parameter wajib',
-    icon: '▦'
-  },
-  {
-    title: 'Pencarian Anime',
-    path: '/anime/kusonime/search/:query',
-    try: '/anime/kusonime/search/fumetsu?page=1',
-    desc: 'Mencari anime berdasarkan kata kunci judul.',
-    param: 'Contoh: /search/fumetsu?page=1',
-    icon: '⌕'
-  },
-  {
-    title: 'Anime per Genre',
-    path: '/anime/kusonime/genre/:slug',
-    try: '/anime/kusonime/genre/action?page=1',
-    desc: 'Mendapatkan daftar anime berdasarkan genre tertentu.',
-    param: 'Contoh: /genre/action?page=1',
-    icon: '◉'
-  },
-  {
-    title: 'Anime per Musim',
-    path: '/anime/kusonime/season/:season/:year',
-    try: '/anime/kusonime/season/fall/2024?page=1',
-    desc: 'Mendapatkan anime berdasarkan musim dan tahun rilis.',
-    param: 'Contoh: /season/fall/2024?page=1',
-    icon: '◷'
-  },
-  {
-    title: 'Detail Anime',
-    path: '/api/detail/:slug',
-    try: '/api/detail/red-river-batch-subtitle-indonesia',
-    desc: 'Mendapatkan detail anime dan informasi link download.',
-    param: 'Gunakan slug anime yang valid.',
-    icon: '▧'
-  }
-];
-
-const $ = id => document.getElementById(id);
-const grid = $('grid');
-const emptyState = $('emptyState');
-const searchInput = $('searchInput');
-const toast = $('toast');
-
-const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-})[char]);
-
-function renderEndpoints(query = '') {
-  const term = query.trim().toLowerCase();
-
-  const filtered = ENDPOINTS.filter(endpoint => [
-    endpoint.title,
-    endpoint.path,
-    endpoint.desc,
-    endpoint.param,
-    endpoint.try
-  ].join(' ').toLowerCase().includes(term));
-
-  grid.querySelectorAll('.endpoint').forEach(card => card.remove());
-
-  filtered.forEach((endpoint, index) => {
-    const card = document.createElement('article');
-    card.className = 'endpoint';
-
-    const number = String(ENDPOINTS.indexOf(endpoint) + 1).padStart(2, '0');
-
-    card.innerHTML = `
-      <div class="endpoint-top">
-        <div class="endpoint-number">${number}</div>
-        <div>
-          <div class="method">GET</div>
-          <h3 class="endpoint-title">${escapeHTML(endpoint.title)}</h3>
-        </div>
-      </div>
-
-      <div class="endpoint-desc">${escapeHTML(endpoint.desc)}</div>
-
-      <code class="endpoint-url">GET ${escapeHTML(endpoint.path)}</code>
-
-      <div class="param-info">${escapeHTML(endpoint.param)}</div>
-
-      <div class="endpoint-actions">
-        <a href="${escapeHTML(endpoint.try)}"
-           target="_blank" rel="noopener noreferrer"
-           aria-label="Coba ${escapeHTML(endpoint.title)}">
-          ↗ Coba Endpoint
-        </a>
-        <button type="button"
-          data-copy="${escapeHTML(endpoint.try)}"
-          aria-label="Salin URL ${escapeHTML(endpoint.title)}">
-          ▢ Salin URL
-        </button>
-      </div>
-    `;
-
-    grid.insertBefore(card, emptyState);
-  });
-
-  emptyState.classList.toggle('show', filtered.length === 0);
-  $('visibleCount').textContent = `${filtered.length} dari ${ENDPOINTS.length}`;
-  $('epCount').textContent = `${ENDPOINTS.length} Endpoints`;
-}
-
-renderEndpoints();
-
-searchInput.addEventListener('input', event => {
-  renderEndpoints(event.target.value);
-});
-
-/* Salin URL lengkap */
-let toastTimer;
-
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
-}
-
-async function copyText(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const area = document.createElement('textarea');
-  area.value = text;
-  area.setAttribute('readonly', '');
-  area.style.position = 'fixed';
-  area.style.opacity = '0';
-  document.body.appendChild(area);
-  area.select();
-
-  const success = document.execCommand('copy');
-  area.remove();
-
-  if (!success) throw new Error('Penyalinan tidak didukung browser.');
-}
-
-grid.addEventListener('click', async event => {
-  const button = event.target.closest('[data-copy]');
-  if (!button) return;
-
-  const originalText = button.textContent;
-  const url = new URL(button.dataset.copy, window.location.origin).href;
-
-  try {
-    await copyText(url);
-    button.textContent = '✓ Tersalin';
-    showToast('URL berhasil disalin!');
-  } catch {
-    showToast('Gagal menyalin. Silakan salin URL secara manual.');
-  }
-
-  setTimeout(() => {
-    if (button.isConnected) button.textContent = originalText;
-  }, 1500);
-});
-
-/* Efek mengetik */
-(function typingEffect() {
-  const element = $('typed');
-  const words = ['WELCOME', 'KUSONIME API'];
-  const reducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
-  ).matches;
-
-  if (reducedMotion) {
-    element.textContent = words[1];
-    return;
-  }
-
-  let wordIndex = 0;
-  let charIndex = words[0].length;
-  let deleting = true;
-
-  function tick() {
-    const word = words[wordIndex];
-
-    element.textContent = word.slice(0, charIndex);
-
-    let delay = deleting ? 55 : 100;
-
-    if (deleting && charIndex > 0) {
-      charIndex--;
-    } else if (deleting) {
-      deleting = false;
-      wordIndex = (wordIndex + 1) % words.length;
-      delay = 300;
-    } else if (charIndex < words[wordIndex].length) {
-      charIndex++;
-    } else {
-      deleting = true;
-      delay = 1500;
-    }
-
-    setTimeout(tick, delay);
-  }
-
-  setTimeout(tick, 1500);
-})();
-
-/* Jam WIB */
-function updateClock() {
-  const now = new Date();
-
-  $('clock').textContent =
-    now.toLocaleTimeString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      hour12: false
-    }).replace(/\./g, ':') + ' WIB';
-
-  $('date').textContent =
-    now.toLocaleDateString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-}
-
-updateClock();
-setInterval(updateClock, 1000);
-$('year').textContent = new Date().getFullYear();
-
-/* Status API */
-async function checkStatus() {
-  const dot = $('statusDot');
-  const text = $('statusText');
-  const ms = $('statusMs');
-  const started = performance.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
-  dot.className = 'dot';
-  text.textContent = 'Memeriksa...';
-  ms.textContent = 'Menghubungi endpoint...';
-
-  try {
-    const response = await fetch(
-      '/anime/kusonime/all-anime?page=1',
-      {
-        method: 'GET',
-        cache: 'no-store',
-        signal: controller.signal,
-        headers: { Accept: 'application/json' }
-      }
+<span class="code-purple">async function</span> getAnime() {
+  <span class="code-purple">try</span> {
+    <span class="code-purple">const</span> response = <span class="code-purple">await</span> fetch(
+      <span class="code-green">`${API_BASE}/api/anime`</span>
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    <span class="code-purple">if</span> (!response.ok) {
+      <span class="code-purple">throw new</span> Error(<span class="code-green">'Request gagal'</span>);
     }
 
-    dot.className = 'dot ok';
-    text.textContent = 'API Online';
-    ms.textContent = `Respons HTTP ${response.status} · ${Math.round(
-      performance.now() - started
-    )} ms`;
-  } catch (error) {
-    dot.className = 'dot err';
-    text.textContent = 'Tidak Terjangkau';
-    ms.textContent = error.name === 'AbortError'
-      ? 'Permintaan timeout'
-      : 'Periksa route atau koneksi server';
-  } finally {
-    clearTimeout(timeout);
+    <span class="code-purple">const</span> data = <span class="code-purple">await</span> response.json();
+    console.log(data);
+  } <span class="code-purple">catch</span> (error) {
+    console.error(error);
   }
 }
 
-checkStatus();
+getAnime();</code></pre>
+      </div>
 
-/* Menu drawer */
-const drawer = $('drawer');
-const scrim = $('scrim');
-const menuBtn = $('menuBtn');
+      <p style="color: var(--muted); font-size: 12px; margin-top: 12px;">
+        Catatan: ganti domain dan path contoh dengan alamat server serta endpoint
+        yang benar-benar disediakan API kamu.
+      </p>
+    </section>
+  </main>
 
-function toggleDrawer(open) {
-  drawer.classList.toggle('open', open);
-  scrim.classList.toggle('open', open);
-  drawer.setAttribute('aria-hidden', String(!open));
-  menuBtn.setAttribute('aria-expanded', String(open));
-  document.body.style.overflow = open ? 'hidden' : '';
-}
+  <footer>
+    <div class="container">
+      Dibuat dengan ✦ untuk komunitas developer anime ·
+      <strong>Kusonime API</strong> · <span id="year"></span>
+    </div>
+  </footer>
 
-menuBtn.addEventListener('click', () => toggleDrawer(true));
-$('closeMenu').addEventListener('click', () => toggleDrawer(false));
-scrim.addEventListener('click', () => toggleDrawer(false));
+  <script>
+    (() => {
+      'use strict';
 
-drawer.addEventListener('click', event => {
-  if (event.target.closest('a')) toggleDrawer(false);
-});
+      /* Typing Effect - Kusonime API */
+      const typedElement = document.getElementById('typed');
 
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') toggleDrawer(false);
-});
+      function getGreeting() {
+        const hour = Number(
+          new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Jakarta',
+            hour: 'numeric',
+            hour12: false
+          }).format(new Date())
+        );
 
-/* Tema gelap / terang */
-const root = document.documentElement;
+        if (hour >= 4 && hour < 11) return 'Selamat pagi';
+        if (hour >= 11 && hour < 15) return 'Selamat siang';
+        if (hour >= 15 && hour < 18) return 'Selamat sore';
+        return 'Selamat malam';
+      }
 
-try {
-  const savedTheme = localStorage.getItem('kusonime-theme');
-  if (savedTheme === 'light' || savedTheme === 'dark') {
-    root.dataset.theme = savedTheme;
-  }
-} catch {}
+      const phrases = [
+        'WELCOME TO KUSONIME API',
+        getGreeting(),
+        'API Gratis Terbaik'
+      ];
 
-function updateThemeButton() {
-  const isLight = root.dataset.theme === 'light';
-  $('themeBtn').textContent = isLight ? '☾' : '☼';
-  $('themeBtn').setAttribute(
-    'aria-label',
-    isLight ? 'Aktifkan tema gelap' : 'Aktifkan tema terang'
-  );
-  $('themeBtn').title = isLight ? 'Tema gelap' : 'Tema terang';
-}
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
 
-updateThemeButton();
+      if (reducedMotion) {
+        typedElement.textContent = phrases[0];
+      } else {
+        let phraseIndex = 0;
+        let charIndex = phrases[0].length;
+        let deleting = true;
 
-$('themeBtn').addEventListener('click', () => {
-  root.dataset.theme =
-    root.dataset.theme === 'light' ? 'dark' : 'light';
+        function typeLoop() {
+          const phrase = phrases[phraseIndex];
+          typedElement.textContent = phrase.slice(0, charIndex);
 
-  try {
-    localStorage.setItem('kusonime-theme', root.dataset.theme);
-  } catch {}
+          let delay = deleting ? 45 : 85;
 
-  updateThemeButton();
-});
-</script>
+          if (deleting && charIndex > 0) {
+            charIndex--;
+          } else if (deleting) {
+            deleting = false;
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            delay = 350;
+          } else if (charIndex < phrase.length) {
+            charIndex++;
+          } else {
+            deleting = true;
+            delay = 1800;
+          }
+
+          window.setTimeout(typeLoop, delay);
+        }
+
+        window.setTimeout(typeLoop, 1800);
+      }
+
+      /* Search endpoints */
+      const searchInput = document.getElementById('endpointSearch');
+      const endpointCards = Array.from(
+        document.querySelectorAll('.endpoint-card')
+      );
+      const endpointGrid = document.getElementById('endpointGrid');
+
+      function filterEndpoints() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        endpointCards.forEach(card => {
+          const searchableText = (
+            card.innerText + ' ' + (card.dataset.search || '')
+          ).toLowerCase();
+
+          const matches = searchableText.includes(query);
+          card.hidden = !matches;
+
+          if (matches) visibleCount++;
+        });
+
+        let emptyState = endpointGrid.querySelector('.empty-state');
+
+        if (visibleCount === 0) {
+          if (!emptyState) {
+            emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.textContent = 'Endpoint tidak ditemukan.';
+            endpointGrid.appendChild(emptyState);
+          }
+        } else if (emptyState) {
+          emptyState.remove();
+        }
+      }
+
+      searchInput.addEventListener('input', filterEndpoints);
+
+      /* Copy endpoint path */
+      document.querySelectorAll('[data-copy]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const value = button.dataset.copy;
+          const originalText = button.textContent;
+
+          try {
+            await navigator.clipboard.writeText(value);
+            button.textContent = 'Tersalin!';
+          } catch (error) {
+            const temporaryInput = document.createElement('textarea');
+            temporaryInput.value = value;
+            temporaryInput.style.position = 'fixed';
+            temporaryInput.style.opacity = '0';
+            document.body.appendChild(temporaryInput);
+            temporaryInput.select();
+
+            const copied = document.execCommand('copy');
+            temporaryInput.remove();
+            button.textContent = copied ? 'Tersalin!' : 'Salin manual';
+          }
+
+          window.setTimeout(() => {
+            button.textContent = originalText;
+          }, 1500);
+        });
+      });
+
+      /* Footer year */
+      document.getElementById('year').textContent =
+        new Date().getFullYear();
+    })();
+  </script>
 </body>
 </html>
