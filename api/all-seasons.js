@@ -13,9 +13,19 @@ export default async function handler(req, res) {
   const send = (code, obj) => res.status(code).send(JSON.stringify(obj, null, 2));
 
   try {
-    const r = await fetch(`${BASE}/`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const targetUrl = `${BASE}/`;
+    
+    // Gunakan Proxy untuk bypass 403/Cloudflare
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+    
+    const r = await fetch(proxyUrl, { 
+      headers: { 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' 
+      } 
+    });
+    
     if (!r.ok) {
-      return send(r.status, { status: 'error', creator: 'hiru404', message: `Sumber membalas ${r.status}` });
+      return send(r.status, { status: 'error', creator: 'hiru404', message: `Proxy/Sumber membalas ${r.status}` });
     }
 
     const $ = load(await r.text());
@@ -38,7 +48,7 @@ export default async function handler(req, res) {
       return send(502, {
         status: 'error',
         creator: 'hiru404',
-        message: 'Season tidak ditemukan. Struktur halaman Kusonime mungkin berubah.'
+        message: 'Season tidak ditemukan. Kusonime mungkin memblokir proxy atau struktur halaman berubah.'
       });
     }
 
